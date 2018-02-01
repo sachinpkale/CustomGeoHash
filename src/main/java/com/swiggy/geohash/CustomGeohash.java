@@ -1,11 +1,5 @@
 package com.swiggy.geohash;
 
-import redis.clients.jedis.Jedis;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.util.*;
-
 public class CustomGeohash {
 
     private static String leftpad(String s, int num) {

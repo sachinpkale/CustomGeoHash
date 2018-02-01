@@ -3,9 +3,6 @@ package com.swiggy.geohash;
 public class HaversineDistance {
     private static final double R = 6372.8D;
 
-    HaversineDistance() {
-    }
-
     public int getDistance(double lat1, double lon1, double lat2, double lon2) {
         double dLat = Math.toRadians(lat2 - lat1);
         double dLon = Math.toRadians(lon2 - lon1);
