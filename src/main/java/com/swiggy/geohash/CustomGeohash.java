@@ -1,21 +1,60 @@
+package com.swiggy.geohash;
+
+import redis.clients.jedis.Jedis;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.*;
+
 public class CustomGeohash {
 
-    public static class LatLng {
-        Double lat;
-        Double lng;
-
-        public LatLng(Double lat, Double lng) {
-            this.lat = lat;
-            this.lng = lng;
+    private static String leftpad(String s, int num) {
+        String r = "";
+        for(int i = 0; i < num; i++) {
+            r += "0";
         }
+        return r + s;
+    }
 
-        public Double getLat() {
-            return lat;
+    private static String interleave(String lngs, String lats) {
+        if(lngs.length() < lats.length()) {
+            lngs = leftpad(lngs, lats.length() - lngs.length());
         }
+        if(lats.length() < lngs.length()) {
+            lats = leftpad(lats, lngs.length() - lats.length());
+        }
+        String s = "";
+        for(int i = 0; i < lngs.length(); i++) {
+            s += lngs.charAt(i);
+            s += lats.charAt(i);
+        }
+        return s;
+    }
 
-        public Double getLng() {
-            return lng;
+    private static String binaryToHex(String binaryString) {
+        return Long.toHexString(Long.parseLong(binaryString, 2));
+    }
+
+    public static String[] adjacent(String geohash) {
+        String value = Long.toBinaryString(Long.decode("0X" + geohash));
+        String lats = "";
+        String lngs = "";
+        for(int i = 0; i < value.length(); i++) {
+            if(i%2 == 0) {
+                lngs += value.charAt(i);
+            } else {
+                lats += value.charAt(i);
+            }
         }
+        Long lngNum = Long.parseLong(lngs, 2);
+        Long latNum = Long.parseLong(lats, 2);
+        String leftLng = Long.toBinaryString(lngNum - 1);
+        String rightLng = Long.toBinaryString(lngNum + 1);
+        String upLat = Long.toBinaryString(latNum + 1);
+        String downLat = Long.toBinaryString(latNum - 1);
+        String[] neighbors = {binaryToHex(interleave(leftLng, lats)), binaryToHex(interleave(rightLng, lats)),
+                binaryToHex(interleave(lngs, upLat)), binaryToHex(interleave(lngs, downLat))};
+        return neighbors;
     }
 
     public static LatLng decode(String geohash) {
@@ -77,12 +116,5 @@ public class CustomGeohash {
             }
         }
         return Long.toHexString(result);
-    }
-
-    public static void main(String[] args) {
-        String geohash = encode(new LatLng(12.906284, 77.59330699999998), 8);
-        System.out.println(geohash);
-        LatLng latLng = decode(geohash);
-        System.out.println(latLng.getLat() + ", " + latLng.getLng());
     }
 }
